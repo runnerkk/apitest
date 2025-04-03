@@ -22,7 +22,7 @@ public class MovieDetailController {
     @GetMapping("/movie/detail/{movie_id}")
     public ResponseEntity<Object> getMovieDetail(@PathVariable("movie_id") String movieId) {
 
-        String url = BASE_URL + movieId + "?api_key=" + API_KEY;
+        String url = BASE_URL + movieId;
 
         Request request = new Request.Builder()
                 .url(url)
