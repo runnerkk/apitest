@@ -1,8 +1,11 @@
 package khpractice.api.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -17,7 +20,7 @@ public class MovieDetailController {
     private static final OkHttpClient client = new OkHttpClient();
 
     @GetMapping("/movie/detail/{movie_id}")
-    public String getMovieDetail(@PathVariable("movie_id") String movieId) {
+    public ResponseEntity<Object> getMovieDetail(@PathVariable("movie_id") String movieId) {
 
         String url = BASE_URL + movieId + "?api_key=" + API_KEY;
 
@@ -30,12 +33,14 @@ public class MovieDetailController {
 
         try (Response response = client.newCall(request).execute()) {
             if (response.isSuccessful() && response.body() != null) {
-                return response.body().string();  // 정상 응답 반환
+                ObjectMapper objectMapper = new ObjectMapper();
+                Object json = objectMapper.readValue(response.body().string(), Object.class);
+                return ResponseEntity.ok(json);  // 정상 응답 반환
             } else {
-                return "API 요청 실패: 응답 코드 " + response.code();  // 실패한 경우, 상태 코드 반환
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("API 요청 실패: 응답 코드 " + response.code());  // 실패한 경우, 상태 코드 반환
             }
         } catch (IOException e) {
-            return "API 요청 중 오류 발생: " + e.getMessage();  // 예외 발생 시 오류 메시지 반환
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("API 요청 중 오류 발생: " + e.getMessage());
         }
     }
 }
